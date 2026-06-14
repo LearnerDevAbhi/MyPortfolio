@@ -301,6 +301,65 @@ function NavBar({ active }) {
   );
 }
 
+function NameTyping() {
+  const words = ["ABHISHEK", "TIWARI"];
+  const [line1, setLine1] = useState("");
+  const [line2, setLine2] = useState("");
+  const [phase, setPhase] = useState(1); // 1 = typing line1, 2 = typing line2, 3 = done
+
+  useEffect(() => {
+    if (phase === 1) {
+      if (line1.length < words[0].length) {
+        const t = setTimeout(() => setLine1(words[0].slice(0, line1.length + 1)), 80);
+        return () => clearTimeout(t);
+      } else {
+        setTimeout(() => setPhase(2), 200);
+      }
+    }
+    if (phase === 2) {
+      if (line2.length < words[1].length) {
+        const t = setTimeout(() => setLine2(words[1].slice(0, line2.length + 1)), 80);
+        return () => clearTimeout(t);
+      } else {
+        setPhase(3);
+      }
+    }
+  }, [line1, line2, phase]);
+
+  return (
+    <div style={{ lineHeight: 1.05 }}>
+      <div style={{
+        fontSize: "clamp(3.5rem, 9vw, 8rem)",
+        fontWeight: 900,
+        letterSpacing: "-0.02em",
+        color: "#fff",
+        display: "flex", alignItems: "center", gap: "8px",
+      }}>
+        {line1}
+        {phase === 1 && (
+          <span style={{ color: "#06b6d4", animation: "blink 1s step-end infinite", fontWeight: 300 }}>|</span>
+        )}
+      </div>
+
+      <div style={{
+        fontSize: "clamp(3.5rem, 9vw, 8rem)",
+        fontWeight: 900,
+        letterSpacing: "-0.02em",
+        background: "linear-gradient(135deg, #06b6d4, #67e8f9)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        display: "flex", alignItems: "center", gap: "8px",
+        minHeight: "1.1em",
+      }}>
+        {line2}
+        {phase === 2 && (
+          <span style={{ color: "#06b6d4", animation: "blink 1s step-end infinite", WebkitTextFillColor: "#06b6d4" }}>|</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Hero ───────────────────────────────────────────────────────
 function HeroSection() {
   const isMobile = useIsMobile();
@@ -345,13 +404,9 @@ function HeroSection() {
           />
         </div> */}
 
-        <h1 style={{
-          fontSize: isMobile ? "clamp(3rem,14vw,4.5rem)" : "clamp(3.5rem,8vw,7rem)",
-          fontWeight: 300, letterSpacing: "-0.03em", lineHeight: 1.0,
-          color: "#fff", margin: "0 0 1.5rem",
-        }}>
-          Abhishek<br />Tiwari
-        </h1>
+        <div style={{ margin: "0 0 1.5rem" }}>
+        <NameTyping />
+      </div>
 
         <p style={{
           fontFamily: "monospace",
