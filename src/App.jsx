@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import profileImage from "./assets/image.png";
 
 const C = {
-  primary:   "#06b6d4",
+  primary: "#06b6d4",
   secondary: "#0891b2",
-  light:     "#67e8f9",
-  dim:       "rgba(6,182,212,0.15)",
+  light: "#67e8f9",
+  dim: "rgba(6,182,212,0.15)",
   dimBorder: "rgba(6,182,212,0.25)",
 };
 
@@ -17,21 +18,21 @@ const TYPING_STRINGS = [
 ];
 
 const SKILLS = {
-  Frontend:              ["React.js", "TypeScript", "JavaScript", "Tailwind CSS"],
-  Backend:               ["Node.js", "Express.js", "NestJS"],
-  Databases:             ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
-  "Cloud & DevOps":      ["AWS", "Azure", "Docker", "Jenkins", "Ansible"],
-  "Messaging & Realtime":["Kafka", "Socket.io", "IronMQ"],
-  "AI & Automation":     ["OpenAI APIs", "LangChain", "RAG Systems", "AI Agents", "Conversational AI", "Workflow Automation"],
+  Frontend: ["React.js", "TypeScript", "JavaScript", "Tailwind CSS"],
+  Backend: ["Node.js", "Express.js", "NestJS"],
+  Databases: ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
+  "Cloud & DevOps": ["AWS", "Azure", "Docker", "Jenkins", "Ansible"],
+  "Messaging & Realtime": ["Kafka", "Socket.io", "IronMQ"],
+  "AI & Automation": ["OpenAI APIs", "LangChain", "RAG Systems", "AI Agents", "Conversational AI", "Workflow Automation"],
 };
 
 const SKILL_COLORS = {
-  Frontend:              "#06b6d4",
-  Backend:               "#0891b2",
-  Databases:             "#67e8f9",
-  "Cloud & DevOps":      "#22d3ee",
-  "Messaging & Realtime":"#a5f3fc",
-  "AI & Automation":     "#0e7490",
+  Frontend: "#06b6d4",
+  Backend: "#0891b2",
+  Databases: "#67e8f9",
+  "Cloud & DevOps": "#22d3ee",
+  "Messaging & Realtime": "#a5f3fc",
+  "AI & Automation": "#0e7490",
 };
 
 const EXPERIENCE = [
@@ -102,13 +103,13 @@ const PROJECTS = [
 ];
 
 const AI_CAPS = [
-  { label: "LLM Integration",     icon: "🧠" },
-  { label: "AI Agents",           icon: "⚡" },
-  { label: "Conversational AI",   icon: "💬" },
-  { label: "RAG Systems",         icon: "📚" },
+  { label: "LLM Integration", icon: "🧠" },
+  { label: "AI Agents", icon: "⚡" },
+  { label: "Conversational AI", icon: "💬" },
+  { label: "RAG Systems", icon: "📚" },
   { label: "Workflow Automation", icon: "🔄" },
   { label: "AI Customer Support", icon: "🎧" },
-  { label: "Voice AI",            icon: "🎤" },
+  { label: "Voice AI", icon: "🎤" },
   { label: "AI Sales Assistants", icon: "💰" },
 ];
 
@@ -388,37 +389,37 @@ function HeroSection() {
         </div>
       )} */}
       {!isMobile && (
-  <div style={{
-    flex: 1, display: "flex", alignItems: "center",
-    justifyContent: "flex-end", zIndex: 1,
-  }}>
-    <div style={{
-      width: "480px", height: "580px",
-      borderRadius: "20px",
-      overflow: "hidden",
-      border: `1px solid ${C.dimBorder}`,
-      boxShadow: `0 0 80px ${C.dim}, 0 40px 80px rgba(0,0,0,0.4)`,
-      position: "relative",
-    }}>
-      <img
-        src="/abhishek.jpg"
-        alt="Abhishek Tiwari"
-        style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
-        onError={e => {
-          e.target.style.display = "none";
-          e.target.parentNode.style.background = C.dim;
-          e.target.parentNode.innerHTML += `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;font-weight:800;color:${C.primary}">AT</div>`;
-        }}
-      />
-      {/* subtle bottom fade */}
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, height: "40%",
-        background: "linear-gradient(to top, #09090b 0%, transparent 100%)",
-        pointerEvents: "none",
-      }} />
-    </div>
-  </div>
-)}
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center",
+          justifyContent: "flex-end", zIndex: 1,
+        }}>
+          <div style={{
+            width: "480px", height: "580px",
+            borderRadius: "20px",
+            overflow: "hidden",
+            border: `1px solid ${C.dimBorder}`,
+            boxShadow: `0 0 80px ${C.dim}, 0 40px 80px rgba(0,0,0,0.4)`,
+            position: "relative",
+          }}>
+            <img
+              src={profileImage}
+              alt="Abhishek Tiwari"
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
+              onError={e => {
+                e.target.style.display = "none";
+                e.target.parentNode.style.background = C.dim;
+                e.target.parentNode.innerHTML += `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;font-weight:800;color:${C.primary}">AT</div>`;
+              }}
+            />
+            {/* subtle bottom fade */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "40%",
+              background: "linear-gradient(to top, #09090b 0%, transparent 100%)",
+              pointerEvents: "none",
+            }} />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -427,10 +428,10 @@ function HeroSection() {
 function AboutSection() {
   const isMobile = useIsMobile();
   const stats = [
-    { n: "4+",   label: "Years Experience" },
-    { n: "20+",  label: "Projects Shipped" },
+    { n: "4+", label: "Years Experience" },
+    { n: "20+", label: "Projects Shipped" },
     { n: "10K+", label: "Users Served" },
-    { n: "6",    label: "Industries" },
+    { n: "6", label: "Industries" },
   ];
   return (
     <section id="about" style={{ padding: isMobile ? "5rem 1.5rem" : "7rem 6rem" }}>
@@ -734,7 +735,7 @@ function Footer() {
         </span>
         <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "12px", fontFamily: "monospace" }}>© 2025 Abhishek Tiwari</span>
         <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-          {["about","skills","experience","projects","ai","contact"].map(l => (
+          {["about", "skills", "experience", "projects", "ai", "contact"].map(l => (
             <a key={l} href={`#${l}`} style={{ color: "rgba(255,255,255,0.3)", textDecoration: "none", fontSize: "12px", textTransform: "capitalize", fontFamily: "monospace", transition: "color 0.2s" }}
               onMouseEnter={e => e.target.style.color = C.primary}
               onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.3)"}
@@ -750,7 +751,7 @@ function Footer() {
 export default function Portfolio() {
   const [active, setActive] = useState("hero");
   useEffect(() => {
-    const ids = ["hero","about","skills","experience","projects","ai","contact"];
+    const ids = ["hero", "about", "skills", "experience", "projects", "ai", "contact"];
     const obs = new IntersectionObserver(
       entries => entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }),
       { threshold: 0.2 }
