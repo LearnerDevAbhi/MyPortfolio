@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import profileImage from "./assets/image.png";
+import { useState, useEffect, useRef, useId } from "react";
+import sorcererImage from "./assets/sorcerer-dusk.jpg";
 import "./App.css";
 
 const EMAIL = "tiwariabhishek1348@gmail.com";
@@ -8,72 +8,111 @@ const LINKEDIN = "https://www.linkedin.com/in/devabhishektiwari/";
 const NAV = ["about", "skills", "ai", "experience", "projects", "contact"];
 const NAV_LABELS = { about: "About", skills: "Skills", ai: "AI Stack", experience: "Experience", projects: "Work", contact: "Contact" };
 
-const TYPING_STRINGS = [
-  "building RAG chatbots with LangChain",
-  "automating workflows with n8n",
-  "shipping Python + Node.js services",
-  "wiring LLMs into real products",
-  "designing event-driven systems",
-];
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 const MARQUEE = ["Python", "LangChain", "n8n", "Vector DBs", "OpenAI", "RAG", "NestJS", "React", "Kafka", "PostgreSQL", "AWS", "Azure", "Docker"];
+
+const SIGIL_RUNES = "PYTHON ✦ LANGCHAIN ✦ N8N ✦ RAG ✦ NESTJS ✦ KAFKA ✦ VECTORS ✦ REACT ✦ OPENAI ✦ AZURE ✦ ";
+
+// Two schools of magic, matching the portrait: gold (engineering) on the
+// left hands, arcane blue (AI) on the right, Python at the core binding both.
+const SCHOOLS = {
+  gold: { name: "School of Craft", sub: "Engineering", tag: "Craft" },
+  arcane: { name: "School of the Arcane", sub: "AI & Automation", tag: "Arcane" },
+  core: { name: "The Core", sub: "Where both schools meet", tag: "Core" },
+};
+
+// One spell per hand. x/y are % positions of each glowing spell circle
+// within the image, so the hotspots sit on top of them.
+const HANDS = [
+  {
+    key: "llm", school: "arcane", x: 83.5, y: 13.5, icon: "🧠", name: "LLMs & RAG",
+    title: "Conjuring grounded AI",
+    desc: "Retrieval-augmented chatbots and tool-calling agents that answer from your own data, backed by vector search.",
+    chips: ["LangChain", "OpenAI", "RAG", "Pinecone", "pgvector"],
+  },
+  {
+    key: "backend", school: "gold", x: 20, y: 11, icon: "🛠️", name: "Backend",
+    title: "Systems built to scale",
+    desc: "NestJS microservices, Kafka event pipelines and Socket.io real-time features serving 10K+ daily users.",
+    chips: ["Node.js", "NestJS", "Kafka", "Socket.io"],
+  },
+  {
+    key: "python", school: "core", x: 50.5, y: 59, icon: "🐍", name: "Python",
+    title: "The core that binds both",
+    desc: "The language at the centre of the craft — LangChain pipelines, ingestion, embeddings and API services.",
+    chips: ["Python", "LangChain", "REST APIs", "Scripting"],
+  },
+  {
+    key: "n8n", school: "arcane", x: 92, y: 57.5, icon: "⚙️", name: "n8n & Chatbots",
+    title: "Automations that run themselves",
+    desc: "Webhooks in, LLM steps in the middle, CRMs and messaging out — plus support bots with human hand-off.",
+    chips: ["n8n", "Webhooks", "AI Nodes", "Chat Widgets", "Whisper"],
+  },
+  {
+    key: "cloud", school: "gold", x: 7.5, y: 45.5, icon: "☁️", name: "Cloud & Data",
+    title: "The foundation that holds it up",
+    desc: "Containerised deploys and CI/CD on AWS and Azure, over PostgreSQL, MongoDB and Redis tuned for real workloads.",
+    chips: ["AWS", "Azure", "Docker", "PostgreSQL", "Redis"],
+  },
+];
 
 // Headline skill cards (bento). `span` maps to a grid-column class.
 const SKILL_CARDS = [
   {
-    key: "ai", span: "span-4", cls: "card-ai", icon: "🧠", kicker: "Core focus",
+    key: "ai", school: "arcane", span: "span-4", cls: "card-ai", icon: "🧠", kicker: "Core focus",
     title: "LLMs, LangChain & RAG",
     desc: "Retrieval-augmented chatbots and agents that answer from your own data — chunking, embeddings, retrieval, prompt design and tool-calling agents.",
     chips: ["LangChain", "OpenAI APIs", "RAG pipelines", "AI Agents", "Embeddings", "Prompt Engineering", "Function Calling"],
     accent: true,
   },
   {
-    key: "python", span: "span-2", cls: "card-python", icon: "🐍", kicker: "Language",
+    key: "python", school: "core", span: "span-2", cls: "card-python", icon: "🐍", kicker: "Language",
     title: "Python",
     desc: "The glue for AI work — LangChain pipelines, data prep and API services.",
     chips: ["Python", "LangChain", "REST APIs", "Scripting"],
     code: true,
   },
   {
-    key: "n8n", span: "span-3", cls: "card-n8n", icon: "⚙️", kicker: "Automation",
+    key: "n8n", school: "arcane", span: "span-3", cls: "card-n8n", icon: "⚙️", kicker: "Automation",
     title: "n8n Workflow Automation",
     desc: "Event-driven automations connecting webhooks, LLMs, CRMs and messaging — no brittle glue scripts.",
     chips: ["n8n", "Webhooks", "AI Nodes", "API Integrations", "Scheduled Jobs"],
     flow: true,
   },
   {
-    key: "vector", span: "span-3", cls: "card-vector", icon: "🧭", kicker: "Retrieval",
+    key: "vector", school: "arcane", span: "span-3", cls: "card-vector", icon: "🧭", kicker: "Retrieval",
     title: "Vector Databases",
     desc: "Semantic search over documents: embed, index, and fetch the most relevant context for every query.",
     chips: ["Pinecone", "ChromaDB", "pgvector", "Semantic Search", "Similarity Search"],
     vectors: true,
   },
   {
-    key: "bot", span: "span-2", icon: "💬", kicker: "Conversational AI",
+    key: "bot", school: "arcane", span: "span-2", icon: "💬", kicker: "Conversational AI",
     title: "Chatbot Integration",
     desc: "Website chat widgets and support bots with knowledge-base answers and human hand-off.",
     chips: ["Chat Widgets", "Support Bots", "Voice AI", "Whisper"],
   },
   {
-    key: "backend", span: "span-2", icon: "🛠️", kicker: "Backend",
+    key: "backend", school: "gold", span: "span-2", icon: "🛠️", kicker: "Backend",
     title: "Backend & Messaging",
     desc: "Microservices and real-time systems built to scale.",
     chips: ["Node.js", "NestJS", "Express.js", "Kafka", "Socket.io", "IronMQ"],
   },
   {
-    key: "frontend", span: "span-2", icon: "🎨", kicker: "Frontend",
+    key: "frontend", school: "gold", span: "span-2", icon: "🎨", kicker: "Frontend",
     title: "Frontend",
     desc: "Clean, fast interfaces for AI and SaaS products.",
     chips: ["React.js", "TypeScript", "JavaScript", "Tailwind CSS"],
   },
   {
-    key: "data", span: "span-3", icon: "🗄️", kicker: "Data",
+    key: "data", school: "gold", span: "span-3", icon: "🗄️", kicker: "Data",
     title: "Databases",
     desc: "Relational, document and cache layers — tuned for real workloads.",
     chips: ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
   },
   {
-    key: "cloud", span: "span-3", icon: "☁️", kicker: "Cloud & DevOps",
+    key: "cloud", school: "gold", span: "span-3", icon: "☁️", kicker: "Cloud & DevOps",
     title: "Cloud & DevOps",
     desc: "Containerised deploys and CI/CD pipelines on AWS and Azure.",
     chips: ["AWS", "Azure", "Docker", "Jenkins", "Ansible"],
@@ -128,22 +167,22 @@ const EXPERIENCE = [
 
 const PROJECTS = [
   {
-    name: "AI Customer Support Agent", icon: "🤖",
+    name: "AI Customer Support Agent", school: "arcane", icon: "🤖",
     desc: "RAG-powered chatbot with knowledge-base search, automated ticket routing and smart escalation.",
     tech: ["Python", "LangChain", "Vector DB", "OpenAI", "React"],
   },
   {
-    name: "AI Objection Handling Assistant", icon: "🎯",
+    name: "AI Objection Handling Assistant", school: "arcane", icon: "🎯",
     desc: "Real-time AI sales assistant that listens to conversations and surfaces instant response suggestions.",
     tech: ["OpenAI", "Whisper", "React", "NestJS", "PostgreSQL"],
   },
   {
-    name: "Multi-Tenant Asset Tracker", icon: "📡",
+    name: "Multi-Tenant Asset Tracker", school: "gold", icon: "📡",
     desc: "Real-time asset monitoring platform with live updates across distributed tenants.",
     tech: ["Node.js", "Socket.io", "Kafka", "Redis"],
   },
   {
-    name: "Car Wash SaaS CRM", icon: "🚗",
+    name: "Car Wash SaaS CRM", school: "gold", icon: "🚗",
     desc: "Customer relationship and automation platform powering an entire car wash franchise network.",
     tech: ["NestJS", "PostgreSQL", "Azure"],
   },
@@ -199,24 +238,10 @@ function retrieve(question) {
   return best;
 }
 
-// ── Hooks ─────────────────────────────────────────────────────
-function useTyping(strings, speed = 55, pause = 1600) {
-  const [display, setDisplay] = useState("");
-  const [idx, setIdx] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-  useEffect(() => {
-    const current = strings[idx % strings.length];
-    let t;
-    if (!deleting && display === current) t = setTimeout(() => setDeleting(true), pause);
-    else if (deleting && display === "") t = setTimeout(() => { setDeleting(false); setIdx(i => i + 1); }, 200);
-    else t = setTimeout(() => setDisplay(
-      deleting ? current.slice(0, display.length - 1) : current.slice(0, display.length + 1)
-    ), deleting ? speed / 2 : speed);
-    return () => clearTimeout(t);
-  }, [display, deleting, idx, strings, speed, pause]);
-  return display;
-}
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// ── Hooks & primitives ────────────────────────────────────────
 function Reveal({ children, className = "", delay = 0 }) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -238,6 +263,116 @@ function SectionHead({ eyebrow, title, lead }) {
   );
 }
 
+// Mandala-style spell circle. viewBox is centred on 0,0 so each ring
+// group can rotate around the origin.
+function Sigil({ className = "", runes = true, dusk = false }) {
+  const id = useId().replace(/:/g, "");
+  const ticks = Array.from({ length: 72 }, (_, i) => i * 5);
+  return (
+    <svg viewBox="-100 -100 200 200" className={`sigil ${className}`} aria-hidden="true"
+      style={dusk ? { "--sg": `url(#dusk-${id})` } : undefined}>
+      <defs>
+        <linearGradient id={`dusk-${id}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#ffc46b" />
+          <stop offset="0.5" stopColor="#c7a6ff" />
+          <stop offset="1" stopColor="#6fa0ff" />
+        </linearGradient>
+        <path id={`ring-${id}`} d="M -80 0 a 80 80 0 1 1 160 0 a 80 80 0 1 1 -160 0" />
+      </defs>
+      <g className="sg-outer">
+        <circle r="97" strokeWidth="0.6" />
+        <circle r="92" strokeWidth="1.4" />
+        {ticks.map(a => (
+          <line key={a} x1="0" y1="-92" x2="0" y2={a % 30 === 0 ? -85 : -89} transform={`rotate(${a})`} strokeWidth="0.8" />
+        ))}
+        {runes && (
+          <text className="sg-runes">
+            <textPath href={`#ring-${id}`} textLength="502" lengthAdjust="spacing">{SIGIL_RUNES}</textPath>
+          </text>
+        )}
+      </g>
+      <g className="sg-mid">
+        <circle r="72" strokeWidth="1.2" />
+        <rect x="-50.9" y="-50.9" width="101.8" height="101.8" strokeWidth="1.1" />
+        <rect x="-50.9" y="-50.9" width="101.8" height="101.8" strokeWidth="1.1" transform="rotate(45)" />
+      </g>
+      <g className="sg-inner">
+        <circle r="50.9" strokeWidth="0.9" />
+        <polygon points="0,-48 41.6,24 -41.6,24" strokeWidth="0.9" />
+        <polygon points="0,48 41.6,-24 -41.6,-24" strokeWidth="0.9" />
+        <circle r="22" strokeWidth="1.2" />
+        <circle r="5" className="sg-core" />
+      </g>
+    </svg>
+  );
+}
+
+// Rising embers across the page, plus sparks that trail the cursor.
+function Embers() {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    const canvas = ref.current;
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const parts = [];
+    let w = 0, h = 0, raf = 0;
+
+    const resize = () => {
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    // Left of screen burns gold, right glows arcane blue/violet — like the portrait.
+    const hueAt = x => {
+      const t = x / w + (Math.random() - 0.5) * 0.25;
+      return t < 0.5 ? 30 + Math.random() * 16 : 215 + Math.random() * 50;
+    };
+    const spawn = (x, y, burst) => parts.push({
+      x, y,
+      vx: (Math.random() - 0.5) * (burst ? 1.6 : 0.3),
+      vy: burst ? (Math.random() - 0.8) * 1.6 : -(0.3 + Math.random() * 0.7),
+      life: 0,
+      max: burst ? 40 + Math.random() * 30 : 220 + Math.random() * 200,
+      size: burst ? 1 + Math.random() * 1.6 : 0.6 + Math.random() * 1.6,
+      hue: hueAt(x),
+    });
+    const onMove = e => { for (let i = 0; i < 2; i++) spawn(e.clientX, e.clientY, true); };
+
+    const tick = () => {
+      ctx.clearRect(0, 0, w, h);
+      if (parts.length < 90 && Math.random() < 0.35) spawn(Math.random() * w, h + 10, false);
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.life++;
+        p.x += p.vx + Math.sin((p.life + p.hue) * 0.03) * 0.25;
+        p.y += p.vy;
+        const t = p.life / p.max;
+        if (t >= 1) { parts.splice(i, 1); continue; }
+        const a = Math.sin(t * Math.PI);
+        ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${a * 0.18})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `hsla(${p.hue + 12}, 100%, 75%, ${a * 0.9})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+      }
+      if (parts.length > 260) parts.splice(0, parts.length - 260);
+      raf = requestAnimationFrame(tick);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onMove);
+    };
+  }, []);
+  return <canvas ref={ref} className="embers" aria-hidden="true" />;
+}
+
 // ── Nav ────────────────────────────────────────────────────────
 function ScrollProgress() {
   const [p, setP] = useState(0);
@@ -254,13 +389,13 @@ function NavBar({ active }) {
   return (
     <>
       <nav className="nav">
-        <a href="#top" className="logo">abhishek<span>.ai</span></a>
+        <a href="#top" className="logo"><Sigil className="logo-sigil" runes={false} dusk /><span className="logo-text">Abhishek<span>.dev</span></span></a>
         <ul className="nav-links">
           {NAV.map(id => (
             <li key={id}><a href={`#${id}`} className={active === id ? "active" : ""}>{NAV_LABELS[id]}</a></li>
           ))}
         </ul>
-        <a href={`mailto:${EMAIL}`} className="btn btn-primary">Let's talk</a>
+        <a href="#contact" className="btn btn-primary nav-cta">Open a portal</a>
         <button className="menu-btn" aria-label="Toggle menu" onClick={() => setOpen(o => !o)}>{open ? "✕" : "☰"}</button>
       </nav>
       {open && (
@@ -275,32 +410,90 @@ function NavBar({ active }) {
 }
 
 // ── Hero ───────────────────────────────────────────────────────
+const CYCLE_MS = 3600;
+
 function Hero() {
-  const typed = useTyping(TYPING_STRINGS);
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(prefersReducedMotion);
+  const hand = HANDS[active];
+
+  useEffect(() => {
+    if (paused) return;
+    const t = setTimeout(() => setActive(i => (i + 1) % HANDS.length), CYCLE_MS);
+    return () => clearTimeout(t);
+  }, [active, paused]);
+
+  // Picking a hand stops the auto-cycle so the visitor can read it.
+  const pick = i => { setActive(i); setPaused(true); };
+
   return (
-    <header id="top" className="hero">
-      <div className="grid-bg" />
+    <header id="top" className={`hero school-${hand.school}`}>
       <div className="container hero-grid">
-        <div>
+        <div className="hero-copy">
           <div className="status"><span className="pulse" /> Open to AI & automation projects</div>
-          <h1>Abhishek<br /><span className="outline">Tiwari</span></h1>
-          <p className="hero-role"><strong>Full Stack & AI Engineer</strong> — I build LLM chatbots, RAG pipelines and n8n automations on top of solid, scalable backends.</p>
-          <p className="typed">&gt; {typed}<span className="caret" /></p>
+          <p className="hero-kicker">Full Stack & AI Engineer · Noida, India</p>
+          <h1><span>Abhishek</span><span className="h1-glow">Tiwari</span></h1>
+          <p className="hero-lead">
+            Two schools, one sorcerer. <em className="gold">Solid engineering</em> in one set of
+            hands, <em className="arcane">AI & automation</em> in the other — LLM chatbots, RAG
+            pipelines and n8n workflows on backends built to scale.
+          </p>
+
+          <div className="spell-panel" aria-live="polite">
+            <div className="spell-meta">
+              <span>{SCHOOLS[hand.school].name}</span>
+              <span className="spell-hint">{ROMAN[active]} / {ROMAN[HANDS.length - 1]}</span>
+            </div>
+            <div className="spell-body" key={hand.key}>
+              <span className="spell-icon">{hand.icon}</span>
+              <div>
+                <span className="spell-name">{hand.name} · {SCHOOLS[hand.school].sub}</span>
+                <h3>{hand.title}</h3>
+                <p>{hand.desc}</p>
+              </div>
+            </div>
+            <div className="chips">{hand.chips.map(c => <span key={c} className="chip">{c}</span>)}</div>
+            <div className="spell-tabs" role="group" aria-label="Choose a skill">
+              {HANDS.map((h, i) => (
+                <button key={h.key} className={`school-${h.school} ${i === active ? "on" : ""}`} aria-pressed={i === active} onClick={() => pick(i)}>
+                  {i === active && !paused && <i style={{ animationDuration: `${CYCLE_MS}ms` }} />}
+                  <span>{h.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="hero-cta">
             <a href="#projects" className="btn btn-primary">See my work →</a>
             <a href="#ai" className="btn">How I build AI</a>
           </div>
         </div>
-        <div style={{ position: "relative" }}>
+
+        <div className="portrait-wrap">
+          <Sigil className="portrait-sigil" dusk />
           <div className="portrait">
-            <img src={profileImage} alt="Abhishek Tiwari" />
+            <div className="portrait-img">
+              <img src={sorcererImage} alt="Abhishek Tiwari as a sorcerer, casting golden spells with the hands on one side and blue arcane spells with the other" />
+            </div>
+            {HANDS.map((h, i) => (
+              <button
+                key={h.key}
+                className={`hand school-${h.school} ${i === active ? "active" : ""} ${h.school === "core" || h.x < 12 || h.x > 88 ? "below" : h.x > 50 ? "right" : "left"}`}
+                style={{ left: `${h.x}%`, top: `${h.y}%` }}
+                aria-label={`${h.name}: ${h.title}`}
+                aria-pressed={i === active}
+                onClick={() => pick(i)}
+              >
+                <span className="hand-ring" />
+                {i === active && <Sigil className="hand-sigil" runes={false} />}
+                <span className="hand-label">{h.icon} {h.name}</span>
+              </button>
+            ))}
             <div className="portrait-tag">
-              <div><b>Abhishek Tiwari</b>Noida, India</div>
-              <div>4+ yrs</div>
+              <div><b>Abhishek Tiwari</b>Master of both schools</div>
+              <div className="portrait-yrs">4+<small>yrs</small></div>
             </div>
           </div>
-          <div className="float-card float-a"><i>🐍</i><div><b>Python</b>LangChain</div></div>
-          <div className="float-card float-b"><i>⚙️</i><div><b>n8n</b>automations</div></div>
         </div>
       </div>
       <div className="marquee" aria-hidden="true">
@@ -324,7 +517,7 @@ function About() {
     <section id="about" className="section">
       <div className="container about-grid">
         <Reveal className="about-text">
-          <div className="eyebrow">About</div>
+          <div className="eyebrow">The Origin</div>
           <h2 className="section-title">Backend engineer who learned to make systems <em>think</em>.</h2>
           <p>I'm a Full Stack Developer with 4+ years designing and shipping <strong>SaaS platforms, microservices and event-driven architectures</strong>.</p>
           <p>Today most of my work sits where that foundation meets AI: <strong>Python & LangChain RAG pipelines, vector search, chatbot integrations and n8n workflow automation</strong> — built to be reliable, observable, and actually useful to the business.</p>
@@ -389,16 +582,17 @@ function Skills() {
     <section id="skills" className="section">
       <div className="container">
         <SectionHead
-          eyebrow="Skills"
-          title={<>The stack behind <em>intelligent</em> products</>}
+          eyebrow="The Grimoire"
+          title={<>The spells behind <em>intelligent</em> products</>}
           lead="AI and automation up front, backed by the backend, data and cloud experience that keeps it running in production."
         />
         <div className="bento">
           {SKILL_CARDS.map((c, i) => (
-            <Reveal key={c.key} className={`card ${c.span} ${c.cls || ""}`} delay={(i % 3) * 80}>
+            <Reveal key={c.key} className={`card school-${c.school} ${c.span} ${c.cls || ""}`} delay={(i % 3) * 80}>
+              <Sigil className="card-sigil" runes={false} />
               <div className="card-head">
                 <div className="card-icon">{c.icon}</div>
-                <span className="card-kicker">{c.kicker}</span>
+                <span className="card-kicker">{SCHOOLS[c.school].tag} · {c.kicker}</span>
               </div>
               <h3>{c.title}</h3>
               <p>{c.desc}</p>
@@ -422,7 +616,7 @@ function AIStack() {
     <section id="ai" className="section">
       <div className="container">
         <SectionHead
-          eyebrow="AI Stack"
+          eyebrow="The Ritual"
           title={<>How a question becomes a <em>grounded</em> answer</>}
           lead="A typical chatbot I build: the UI hands off to an n8n workflow, a Python LangChain service retrieves context from a vector database, and the LLM answers with sources."
         />
@@ -430,8 +624,8 @@ function AIStack() {
           <div className="pipeline">
             {PIPELINE.map((s, i) => (
               <div key={s.title} className="stage">
-                <div className="stage-num">0{i + 1}</div>
-                <div className="stage-icon">{s.icon}</div>
+                <div className="stage-orb"><span>{s.icon}</span></div>
+                <div className="stage-num">Step {ROMAN[i]}</div>
                 <h4>{s.title}</h4>
                 <p>{s.desc}</p>
                 <span className="chip">{s.chip}</span>
@@ -452,11 +646,16 @@ function Experience() {
   return (
     <section id="experience" className="section">
       <div className="container">
-        <SectionHead eyebrow="Experience" title={<>Where I've <em>shipped</em></>} />
+        <SectionHead eyebrow="Timelines" title={<>Every timeline where I've <em>shipped</em></>} />
         <div className="jobs">
-          {EXPERIENCE.map(j => (
-            <Reveal key={j.company} className="job">
-              <div className="job-period">{j.period}{j.current && <><br /><span className="now">● current</span></>}</div>
+          {EXPERIENCE.map((j, i) => (
+            <Reveal key={j.company} className={`job ${j.current ? "job-current" : ""}`}>
+              <span className="job-orb" />
+              <div className="job-period">
+                <span className="job-tl">Timeline {ROMAN[EXPERIENCE.length - 1 - i]}</span>
+                {j.period}
+                {j.current && <span className="now">● current</span>}
+              </div>
               <div>
                 <h3>{j.role} <span>@ {j.company}</span></h3>
                 <ul>{j.highlights.map(h => <li key={h}>{h}</li>)}</ul>
@@ -474,13 +673,13 @@ function Projects() {
   return (
     <section id="projects" className="section">
       <div className="container">
-        <SectionHead eyebrow="Selected work" title={<>Things I've <em>built</em></>} />
+        <SectionHead eyebrow="Artifacts" title={<>Things I've <em>built</em></>} />
         <div className="projects">
           {PROJECTS.map((p, i) => (
-            <Reveal key={p.name} className="project" delay={(i % 2) * 100}>
+            <Reveal key={p.name} className={`project school-${p.school}`} delay={(i % 2) * 100}>
               <div className="project-top">
-                <span className="project-icon">{p.icon}</span>
-                <span className="project-idx">0{i + 1}</span>
+                <span className="project-icon"><Sigil className="project-sigil" runes={false} /><i>{p.icon}</i></span>
+                <span className="project-idx">Artifact {ROMAN[i]}</span>
               </div>
               <h3>{p.name}</h3>
               <p>{p.desc}</p>
@@ -520,15 +719,22 @@ function Contact() {
   return (
     <section id="contact" className="section">
       <div className="container">
-        <Reveal className="contact-box">
-          <div className="eyebrow">Contact</div>
-          <h2>Let's build something smart.</h2>
-          <p>Need a RAG chatbot, an n8n automation, or a backend that scales? I'm open to full-time roles, freelance projects and interesting collaborations.</p>
-          <div className="contact-actions">
-            <a href={`mailto:${EMAIL}`} className="btn btn-dark">Send an email →</a>
-            <a href={LINKEDIN} target="_blank" rel="noreferrer" className="btn">LinkedIn</a>
+        <Reveal className="portal">
+          <div className="portal-rings" aria-hidden="true">
+            <span className="portal-ring" />
+            <span className="portal-ring r2" />
+            <span className="portal-ring r3" />
           </div>
-          <div className="contact-meta">{EMAIL} · Noida, India</div>
+          <div className="portal-inner">
+            <div className="eyebrow">Contact</div>
+            <h2>Open a portal.</h2>
+            <p>Need a RAG chatbot, an n8n automation, or a backend that scales? I'm open to full-time roles, freelance projects and interesting collaborations.</p>
+            <div className="contact-actions">
+              <a href={`mailto:${EMAIL}`} className="btn btn-primary">Send an email →</a>
+              <a href={LINKEDIN} target="_blank" rel="noreferrer" className="btn">LinkedIn</a>
+            </div>
+            <div className="contact-meta">{EMAIL} · Noida, India</div>
+          </div>
         </Reveal>
       </div>
     </section>
@@ -539,7 +745,7 @@ function Footer() {
   return (
     <div className="container">
       <footer className="footer">
-        <span>© {new Date().getFullYear()} Abhishek Tiwari</span>
+        <span>© {new Date().getFullYear()} Abhishek Tiwari · crafted with many hands</span>
         <nav>{NAV.map(id => <a key={id} href={`#${id}`}>{NAV_LABELS[id]}</a>)}</nav>
       </footer>
     </div>
@@ -552,7 +758,7 @@ function ChatBot() {
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Hi! I'm a tiny RAG-style bot trained on this portfolio. Ask me about Abhishek's AI stack, n8n, Python, vector DBs or experience." },
+    { from: "bot", text: "Greetings! I'm a tiny RAG-style oracle trained on this portfolio. Ask me about Abhishek's AI stack, n8n, Python, vector DBs or experience." },
   ]);
   const bodyRef = useRef(null);
 
@@ -578,7 +784,7 @@ function ChatBot() {
   if (!open) {
     return (
       <button className="bot-launch" onClick={() => setOpen(true)}>
-        <span className="dot">✦</span> Ask my portfolio
+        <Sigil className="bot-sigil" runes={false} dusk /> Ask the Oracle
       </button>
     );
   }
@@ -586,7 +792,7 @@ function ChatBot() {
   return (
     <div className="bot" role="dialog" aria-label="Portfolio chatbot">
       <div className="bot-head">
-        <div><b>Portfolio Assistant</b><span>retrieval demo · runs in your browser</span></div>
+        <div><b>The Oracle</b><span>retrieval demo · runs in your browser</span></div>
         <button className="bot-close" aria-label="Close chat" onClick={() => setOpen(false)}>✕</button>
       </div>
       <div className="bot-body" ref={bodyRef}>
@@ -625,6 +831,8 @@ export default function Portfolio() {
 
   return (
     <div className="app">
+      <div className="cosmos" aria-hidden="true" />
+      <Embers />
       <ScrollProgress />
       <NavBar active={active} />
       <Hero />
